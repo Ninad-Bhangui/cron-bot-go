@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"script/config"
 	"script/tvdb"
+    "script/tracked"
 	"time"
 )
 
@@ -18,12 +19,14 @@ func main() {
 		return
 	}
 
+    tracker := tracked.TrackedService{}
 	tv := tvdb.Client{ApiKey: conf.TvdbApiKey, Pin: conf.TvdbPin}
 	err = tv.Login()
 	if err != nil {
 		panic(err)
 	}
-	resp := getDaysLeftResponseForTvShow(&tv, "359274")
+    shows := tracker.GetTrackedTvShows()
+	resp := getDaysLeftResponseForTvShow(&tv, shows[0].TvdbId)
 	discordWebhookPost(conf.DiscordWebhookUrl, resp)
 }
 
