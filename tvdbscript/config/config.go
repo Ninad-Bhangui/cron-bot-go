@@ -22,7 +22,6 @@ type ConfigStruct struct {
 }
 
 func ReadConfig() (*ConfigStruct, error) {
-    fmt.Println(os.Getenv("TvdbApiKey"))
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.BindEnv("TvdbApiKey", "TvdbApiKey")
