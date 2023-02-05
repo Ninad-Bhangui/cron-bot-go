@@ -14,7 +14,9 @@ var (
 )
 
 type ConfigStruct struct {
-    DiscordWebhookUrl string `json : "DiscordWebhookUrl"`
+	DiscordWebhookUrl string `json : "DiscordWebhookUrl"`
+	TvdbApiKey        string `json : "TvdbApiKey"`
+	TvdbPin           string `json : "TvdbPin"`
 }
 
 func ReadConfig(path string) (*ConfigStruct, error) {
