@@ -1,9 +1,10 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
+
+	"github.com/spf13/viper"
 )
 
 var (
@@ -20,17 +21,18 @@ type ConfigStruct struct {
 }
 
 func ReadConfig(path string) (*ConfigStruct, error) {
-	fmt.Println("Reading config file...")
-	file, err := ioutil.ReadFile(path)
+    fmt.Println(os.Getenv("TvdbApiKey"))
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
+	viper.BindEnv("TvdbApiKey", "TvdbApiKey")
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
 
 	if err != nil {
-		fmt.Println(err.Error())
-		return nil, err
+		fmt.Printf("%v", err)
 	}
-
-	fmt.Println(string(file))
-
-	err = json.Unmarshal(file, &config)
+	err = viper.Unmarshal(&config)
 
 	if err != nil {
 		fmt.Println(err.Error())

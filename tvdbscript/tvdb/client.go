@@ -32,7 +32,6 @@ func (c *Client) Login() error {
 		return err
 	}
 	c.token = data.Data.Token
-	fmt.Printf("token obtained successfully: %s\n", c.token)
 	return nil
 }
 func (c *Client) GetSeriesNextAiredResponse(seriesId string) (*nextAiredResponse, error) {
@@ -89,7 +88,6 @@ func (c *Client) performPostRequest(path string, params map[string]string) (*htt
 }
 func parseResponse(body io.ReadCloser, data interface{}) error {
 	b, _ := ioutil.ReadAll(body)
-	fmt.Printf("parseResponse: %s", string(b))
 	err := json.Unmarshal(b, data)
 	if err != nil {
 		return err

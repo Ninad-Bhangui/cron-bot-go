@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"script/config"
 	"script/tvdb"
@@ -18,8 +17,6 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-
-	fmt.Println(conf.DiscordWebhookUrl)
 
 	tv := tvdb.Client{ApiKey: conf.TvdbApiKey, Pin: conf.TvdbPin}
 	err = tv.Login()
@@ -61,13 +58,9 @@ func discordWebhookPost(discordWebhookUrl string, params WebhookBody) {
 
 	response, err := http.Post(discordWebhookUrl, "application/json", bytes.NewBuffer(jsonMarshal))
 
+	defer response.Body.Close()
 	if err != nil {
 		panic(err)
 	}
-	defer response.Body.Close()
-
-	content, _ := ioutil.ReadAll(response.Body)
-
-	fmt.Println(string(content))
 
 }
