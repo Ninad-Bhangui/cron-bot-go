@@ -1,89 +1,45 @@
 package main
 
 import (
-	"encoding/json"
+	"cron-bot/commands"
+	"cron-bot/config"
+	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"github.com/bwmarrin/discordgo"
+	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
-
-	"github.com/bwmarrin/discordgo"
 )
-
-var (
-	Token     string
-	BotPrefix string
-
-	config *configStruct
-)
-
-type configStruct struct {
-	Token     string `json : "Token"`
-	BotPrefix string `json : "BotPrefix"`
-}
-
-func ReadConfig() error {
-	fmt.Println("Reading config file...")
-	file, err := ioutil.ReadFile("./config.json")
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-
-	fmt.Println(string(file))
-
-	err = json.Unmarshal(file, &config)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-	Token = config.Token
-	BotPrefix = config.BotPrefix
-
-	return nil
-
-}
-
-var BotId string
-var goBot *discordgo.Session
-
-func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
-	if m.Author.ID == BotId {
-		return
-	}
-
-	if m.Content == BotPrefix+"ping" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "pong")
-	}
-}
 
 func main() {
-	err := ReadConfig()
-
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	goBot, err := discordgo.New("Bot " + config.Token)
+	conf, err := config.ReadConfig("./config.json")
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	u, err := goBot.User("@me")
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	goBot, err := discordgo.New("Bot " + conf.Token)
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	BotId = u.ID
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
-	goBot.AddHandler(messageHandler)
+	goBot.AddHandler(commands.GetMessageHandler(conf.BotPrefix, db))
 	// goBot.ChannelMessageSend()
 
 	err = goBot.Open()
