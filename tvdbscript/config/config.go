@@ -18,9 +18,10 @@ type ConfigStruct struct {
 	DiscordWebhookUrl string `json : "DiscordWebhookUrl"`
 	TvdbApiKey        string `json : "TvdbApiKey"`
 	TvdbPin           string `json : "TvdbPin"`
+    MysqlUri string `json: "MysqlUri"`
 }
 
-func ReadConfig(path string) (*ConfigStruct, error) {
+func ReadConfig() (*ConfigStruct, error) {
     fmt.Println(os.Getenv("TvdbApiKey"))
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")

@@ -6,32 +6,35 @@ import (
 	"fmt"
 	"net/http"
 	"script/config"
+	"script/tracked"
 	"script/tvdb"
-    "script/tracked"
 	"time"
 )
 
 func main() {
-	conf, err := config.ReadConfig("./config.json")
+	conf, err := config.ReadConfig()
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-    tracker := tracked.TrackedService{}
+	tracker := tracked.TrackedService{}
 	tv := tvdb.Client{ApiKey: conf.TvdbApiKey, Pin: conf.TvdbPin}
 	err = tv.Login()
 	if err != nil {
 		panic(err)
 	}
-    shows := tracker.GetTrackedTvShows()
-	resp := getDaysLeftResponseForTvShow(&tv, shows[0].TvdbId)
-	discordWebhookPost(conf.DiscordWebhookUrl, resp)
+	shows := tracker.GetTrackedTvShows()
+	for _, show := range shows {
+		resp := getDaysLeftResponseForTvShow(&tv, show.TvdbId)
+		discordWebhookPost(conf.DiscordWebhookUrl, resp)
+
+	}
 }
 
 func getDaysLeftResponseForTvShow(tv *tvdb.Client, seriesId string) WebhookBody {
-	data, err := tv.GetSeriesNextAiredResponse("359274")
+	data, err := tv.GetSeriesNextAiredResponse(seriesId)
 	if err != nil {
 		panic(err)
 	}
