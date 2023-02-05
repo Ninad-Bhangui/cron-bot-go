@@ -36,13 +36,11 @@ func getDaysLeftResponseForTvShow(tv *tvdb.Client, seriesId string) WebhookBody 
 		panic(err)
 	}
 	timeFormat := "2006-01-02"
-	nextAired, _ := time.Parse(data.Data.NextAired, timeFormat)
-	hoursLeft := nextAired.Sub(time.Now()).Hours()
-    fmt.Printf("Hours left: %d\n", &hoursLeft)
-	daysLeft := int(hoursLeft / 24)
+	nextAired, _ := time.Parse(timeFormat, data.Data.NextAired)
+	daysLeft := timeDiff(time.Now(), nextAired)
 
 	resp := WebhookBody{
-		Content: fmt.Sprintf("% days left for %s", daysLeft, data.Data.Name),
+		Content: fmt.Sprintf("%d days left for %s", daysLeft, data.Data.Name),
 		Embeds: []Embed{
 			{
 				Image: Image{
@@ -52,7 +50,11 @@ func getDaysLeftResponseForTvShow(tv *tvdb.Client, seriesId string) WebhookBody 
 		},
 	}
 	return resp
+}
 
+func timeDiff(source, dest time.Time) int {
+	hoursLeft := dest.Sub(source).Hours()
+	return int(hoursLeft / 24)
 }
 func discordWebhookPost(discordWebhookUrl string, params WebhookBody) {
 	jsonMarshal, _ := json.Marshal(params)
